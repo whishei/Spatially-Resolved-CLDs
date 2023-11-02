@@ -70,7 +70,7 @@ Some settings to play around with would be your choice of bin calculation ('Squa
 
 The figures below are the results of the Neper Case Study and the Titanium Case Study. For the Titanium Case Study, the horizontal SR-CLD was found for the entire gradient of both alloy samples and two areas of interest were chosen from each sample for analysis. 
 <p float="left">
-  <img src="Images/Titanium_new.pdf"
+  <img src="Images/Titanium_NEW.pdf"
 </p>
 <p float="left">
   <img src="Images/Neper_new.pdf"
