@@ -3,24 +3,27 @@ This code works to implement Spatially-resolved chord length distribution (SR-CL
 
 ## Formulation
 
-To tackle the issue of extract system specific energy, we will first examine the model developed by [Cahn & Larche](https://www.sciencedirect.com/science/article/pii/0001616084901731) which seeks to minimize the free energy for a system, for coherent equilibrium between three phases ( $\alpha$, $\beta$, $L$), 
+A chord is defined as a line segment completely contained within a microstructure constituent of interest. For calculation of individual chords, we adopt a pixel-based approach proposed by [Turner](https://iopscience.iop.org/article/10.1088/0965-0393/24/7/075002). The method relies on a digital representation of a microstructure where microstructure constituents have pixel labels distinct from either boundaries or neibhgor constituents. To calculate a chord length, the sequence of voxels (pixels) labeled as interior to each microstructure constituent are counted as we move either vertically or horizontally across an image until a boundary pixel is hit. At that point, the length of the chord (the count of continuous interior pixels) is added to the bag of chords.
 
-$$g=z_Lg_L\left(x_L\right)+z_\alpha g_\alpha\left(x_\alpha\right)+z_\beta g_\beta\left(x_\beta\right)+g_e$$
+Typically, to obtain a single chord length distribution (CLD) for an optical image, there would be a single bag of chords for the whole image. A chord length distribution can then be calculated from the bag of chords in the form of a discrete probability density function using [Latypov](https://www.sciencedirect.com/science/article/pii/S1044580318313743):
 
-Where $z_\alpha,z_\beta,z_L$ are the molar fractions of the $\alpha,\ \beta,\ L$ phases respectively. Given a composition $X$, $g$ has the constraints of the preservation of molar fractions and chemical species,
-$$z_L x_L+z_\alpha x_\alpha+z_\beta x_\beta=X$$
-$$z_\alpha\ +z_\beta\ + z_L = 1$$
-In general, a system where $g_e=0$ has been well studied but cases where $g_e\ \neq 0$ is not well understood. For our research and with regards to more physical meaning, we will study the effects on phase diagrams where $g_e\ \neq0$ and depends only on the solid phases. In the case of the model discussed by Equation 1, Cahn and Larche proposed a model that had simplifying assumptions: infinite two-phase crystal, with both phases being isotropic and linearly elastic with the same elastic constants (e.g., Young’s modulus E and Poisson’s ratio $\nu$). These simplifying assumptions result in the coherency strain energy only depending on the molar fractions of the phases $z_\alpha$ and $z_\beta$ multiplied by the volume of the reference state, V, and the elastic energy, $E\epsilon^2/\left(1-\nu\right)$, which corresponds to a lattice misfit, $\epsilon$, 
-$$g_e=z_\alpha z_\beta VR\epsilon^2/\left(1-\nu\right)$$
-For simplification the code provided sets $A = VR\epsilon^2/\left(1-\nu\right)$ as these are assumed constants giving $g_e = A z_\alpha z_\beta$
+$$P_i = \cfrac{N_i l_i}{\sum^{n}_{i = 1}{N_i l_i}}$$
+
+where the index $i$ goes from $1$ to $n$, the number of chord length bins; $N_i$ denotes the number of chords within the interval of the $i$th bin, with its center corresponding to the chord length $l_i$. Upon calculation, $P_i$ can be interpreted as the probability of finding a pixel that belongs to a chord of length $l_i$ ****Rewrite
+
+To obtain a spatially-resolved chord length distribution (SR-CLD), a distribution is found for each row or each column, rather than for the entire optical image. If the image has vertical spatial heterogeneity, you calculate a distribution horizontally, for each pixel row. Similarly, if the image has horizontal spatial heterogeneity, you calculate a distribution vertically, for each pixel column. To obtain interpretable results, the maximum chord for the entire optical image in the chosen direction is first found before setting the equivalent range and number of bins for every row / column distribution calculated. 
+
+This results in an array of probabilities of size length of rows x $B$ bins. To visualize the spatial heterogeneity, we suggest a heatmap of smoothed SR-CLD probability densities with one axis aligned with the direction of interest, the other axis representing the chord length, and the color representing the probability of finding a chord of a specific length.
+
+Note: The choice of number of bins for the heatmap is not trivial. There are many research groups focused on this question of how to choose the right number of bins to convey an accurate representation of your data. Once all chords are counted along the chosen direction, the distribution of total chords is used to determine the number of bins that will be used throughout the SR-CLD calculation. Some common methods of choosing number of bins include Square Root rule, Sturges' Formula, Scott's Normal Reference Rule, Freedman-Diaconis Rule, Rice's Rule, and Doane's Formula. For this paper, both Rice's rule and Doane's formula were chosen due to the large number of chords and skewness of the distribution, but the authors suggest that future users look into the alternative methods to see which works best for their dataset. 
 
 ## Using the Code
 To run this project, 
 
 ```
-git clone https://github.com/TeddyMeissner/Phase-Optimization.git
+git clone https://github.com/whishei/Spatially-Resolved-CLDs.git
 ```
-From here the core code can be found in the file Binary 3-Phase.ipynb. The three_phase class takes in three symbolic free energy functions and finds the correct phases at a given composition and temperature. The main functionality is to plot the free energy functions along with their common tangents in feasible areas at a given temperature and to return the overall phase diagram. An example of using the code may be, 
+The only file that needs to be adapted is SR_CLDs.py. In here, you will need a path to your preprocessed image, where each pixel of your optical image has a label, with the interior pixels labeled as 1. (All other pixels that are outside of your grain microstructure can have a different label. The SR-CLD calculation will be performed either horizontally or vertically (or both) and can be visualized by a heatmap. 
 
 ```python
 x_a, x_b, x_L,T = sy.symbols('x_α, x_β, x_L,T')
@@ -44,66 +47,11 @@ binary_A_2.plot_diagram(T_grid,title = 'Binary Phase Diagram, A = 2')
 binary_A_0.plot_specific_temp(T_grid[2],x_lim = [.15,.85],y_lim = [9,12])
 binary_A_2.plot_specific_temp(T_grid[2],x_lim = [.15,.85],y_lim = [9,12])
 ```
-<p float="left">
-  <img src="Images/Binary%20Phase%20Diagram,%20A%20=%200.png" width="45%" /> 
-<img src="Images/Binary%20Phase%20Diagram,%20A%20=%202.png" width="45%" /> 
-</p>
 
-<p float="left">
-  <img src="Images/temp_1_17,A%20=0.png" width="45%" /> 
-<img src="Images/temp_1_17,A%20=2.png" width="45%" /> 
-</p>
+## Examples
+There are two provided examples, a Neper case study and a Titanium Case Study. To run either study, uncomment the corresponding section to load the data and run. 
+Some settings to play around with would be your choice of bin calculation ('Square', 'Sturges','Scotts', 'Freed', 'Rice', 'Doane') and how you would like to edit the visualization. 
 
-## Methods
-We are looking to solve:  
-**Minimize**
-$$g(z^\alpha,z^\beta,x^\alpha,x^\beta,x^L) = z^Lg^L(x^L) + z^\alpha g^\alpha(x^\alpha) +z^\beta g^\beta(x^\beta) + A z^\alpha z^\beta$$
-**Subject to**
-$$X = z^Lx_1^L + z^\alpha x^\alpha +z^\beta x^\beta$$
-$$z^\alpha + z^\beta + z^L = 1$$
-$$0 \leq z^L,z^\alpha,z^\beta, x^L, x^\alpha,x^\beta,X \leq 1$$
-The first equality constraint represents the conservation of of the selected composition $X$. The second equality constraint represents preservation of Mass. The inequality constraint represents the necessary conditions for the existence of a phase. To solve the generalized optimization problem by the method of Lagrange multipliers we set the problem up as, 
-
-**Minimize**
-$$l(z^\alpha,z^\beta,x_1^\alpha,x_1^\beta,x_1^L,\lambda) = (1-z^\alpha-z^\beta)g^L(x_1^L) + z^\alpha g^\alpha(x_1^\alpha) +z^\beta g^\beta(x_1^\beta)+ A z^\alpha z^\beta $$
-$$- \lambda( (1-z^\alpha-z^\beta)x_1^L + z^\alpha x_1^\alpha +z^\beta x_1^\beta - X)$$
-**Subject to**
-$$0 \leq z^\alpha,z^\beta,z^\alpha+z^\beta, x_1^L, x_1^\alpha,x_1^\beta,X \leq 1$$
-
-Where the seven possible solutions are (refer to the [writeup](Breif%20writeup.pdf) for further clarification), 
-
-1. $g^L(X)$
-   * $z^\alpha,z^\beta = 0$
-2. $g^\alpha(X)$ 
-    * $z^L,z^\beta = 0$
-3. $g^\beta(X)$
-   * $z^L,z^\alpha = 0$
-4. $(1-z^\beta)g^L(x^L) + z^\beta g^\beta(x^\beta)$
-   * $z^\alpha = 0$
-   * Where, $z^\beta,x^L,x^\beta$ are found by the equations,
-$$\frac{d g^L}{d x_1^L} = \frac{d g^\beta}{d x_1^\beta} = \frac{g^\beta(x^\beta) - g^L(x^L)}{x^\beta - x^L},z^\beta = \frac{X - x^L}{x^\beta - x^L}$$
-5. $(1-z^\alpha)g^L(x^L) + z^\alpha g^\alpha(x^\alpha)$
-   * $z^\beta = 0$
-   * Where, $z^\alpha,x^L,x^\alpha$ are found by the equations,
-$$\frac{d g^L}{d x_1^L} = \frac{d g^\alpha}{d x_1^\alpha} = \frac{g^\alpha(x^\alpha) - g^L(x^L)}{x^\alpha - x^L},z^\alpha = \frac{X - x^L}{x^\alpha - x^L}$$
-6. $z^\alpha g^\alpha(x^\alpha) + z^\beta g^\beta(x^\beta) + A z^\alpha z^\beta$
-   * $z^L = 0$
-   * Where $z^\alpha,z^\beta,x^\alpha,x^\beta$ are found by, 
-$$\frac{d g^\alpha}{d x_1^\alpha} = \frac{d g^\beta}{d x_1^\beta} = \frac{g^\alpha(x_1^\alpha)-g^\beta(x_1^\beta) + A (1 - 2 z^\alpha)}{x_1^\alpha - x_1^\beta},z^\alpha = \frac{X - x^\beta}{x^\alpha - x^\beta}$$
-7. $(1-z^\alpha - z^\beta)g^L(x^L) + z^\alpha g^\alpha(x^\alpha) + z^\beta g^\beta(x^\beta) + A z^\alpha z^\beta$
-   * Where $z^\alpha,z^\beta,x^L,x^\alpha,x^\beta$ are found by, 
-$$\frac{d g^L}{d x_1^L} = \frac{d g^\alpha}{d x_1^\alpha} = \frac{d g^\beta}{d x_1^\beta} = \frac{g^\alpha(x_1^\alpha)-g^L(x_1^L) + A z^\beta}{x_1^\alpha - x_1^L} = \frac{g^\beta(x_1^\beta)-g^L(x_1^L) + A z^\alpha}{x_1^\beta - x_1^L}$$
-$$z^\alpha = \frac{X - x^L}{x^\alpha - x^L} + z^\beta(\frac{x^L - x^\beta}{x^\alpha - x^\beta})$$
-
-The code provided uses these solutions to:
-1. Start with a single temperature
-2. Find the solutions for a variable $X$ which are referred to as "common tangents"
-3. Find all of the points where the common tangents intersect with eachother and the free energy functions (these are referred to in the code as "important points")
-4. Finds the phase at each important point and plots it
-5. Repeat until all wanted temperatures are accounted for 
-
-## Findings
-In a binary three-phase, the eutectic point (that which three phases in equilibrium) becomes a three phase region under stress. At temperatures above the Eutectic point with no-stress, there are no changes in the phase diagram under any amounts of stress. This is due to the fact that the stress is between the $\alpha$ and $\beta$ phases which do not exist above the Eutectic temperature. Below the Eutectic point, we see a disappearance of the $\alpha + \beta$ phase, and a growth from a Eutectic point to a three-phase region. 
 ### Figures
 
 The figures below are using the following free energy functions: 
