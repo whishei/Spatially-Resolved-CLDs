@@ -3,19 +3,11 @@ This code works to implement Spatially-resolved chord length distribution (SR-CL
 
 ## Formulation
 
-A chord is defined as a line segment completely contained within a microstructure constituent of interest. For calculation of individual chords, we adopt a pixel-based approach proposed by [Turner](https://iopscience.iop.org/article/10.1088/0965-0393/24/7/075002). The method relies on a digital representation of a microstructure where microstructure constituents have pixel labels distinct from either boundaries or neibhgor constituents. To calculate a chord length, the sequence of voxels (pixels) labeled as interior to each microstructure constituent are counted as we move either vertically or horizontally across an image until a boundary pixel is hit. At that point, the length of the chord (the count of continuous interior pixels) is added to the bag of chords.
+A chord is defined as a line segment completely contained within a microstructure constituent of interest. For calculation of individual chords, we adopt a pixel-based approach proposed by [Turner](https://iopscience.iop.org/article/10.1088/0965-0393/24/7/075002). The method relies on a digital representation of a microstructure where microstructure constituents have pixel labels distinct from either boundaries or neighbor constituents. To calculate a chord length, the sequence of voxels (pixels) labeled as interior to each microstructure constituent are counted as we move either vertically or horizontally across an image until a boundary pixel is hit. At that point, the length of the chord (the count of continuous interior pixels) is added to the bag of chords.
 
-Typically, to obtain a single chord length distribution (CLD) for an optical image, there would be a single bag of chords for the whole image. A chord length distribution can then be calculated from the bag of chords in the form of a discrete probability density function using [Latypov](https://www.sciencedirect.com/science/article/pii/S1044580318313743):
-
-$$P_i = \cfrac{N_i l_i}{\sum^{n}_{i = 1}{N_i l_i}}$$
-
-where the index $i$ goes from $1$ to $n$, the number of chord length bins; $N_i$ denotes the number of chords within the interval of the $i$th bin, with its center corresponding to the chord length $l_i$. Upon calculation, $P_i$ can be interpreted as the probability of finding a pixel that belongs to a chord of length $l_i$ ****Rewrite
+Typically, to obtain a single chord length distribution (CLD) for an optical image, there would be a single bag of chords for the whole image. A chord length distribution can then be calculated from the bag of chords in the form of a discrete probability density function using [Latypov](https://www.sciencedirect.com/science/article/pii/S1044580318313743).
 
 To obtain a spatially-resolved chord length distribution (SR-CLD), a distribution is found for each row or each column, rather than for the entire optical image. If the image has vertical spatial heterogeneity, you calculate a distribution horizontally, for each pixel row. Similarly, if the image has horizontal spatial heterogeneity, you calculate a distribution vertically, for each pixel column. To obtain interpretable results, the maximum chord for the entire optical image in the chosen direction is first found before setting the equivalent range and number of bins for every row / column distribution calculated. 
-
-This results in an array of probabilities of size length of rows x $B$ bins. To visualize the spatial heterogeneity, we suggest a heatmap of smoothed SR-CLD probability densities with one axis aligned with the direction of interest, the other axis representing the chord length, and the color representing the probability of finding a chord of a specific length.
-
-Note: The choice of number of bins for the heatmap is not trivial. There are many research groups focused on this question of how to choose the right number of bins to convey an accurate representation of your data. Once all chords are counted along the chosen direction, the distribution of total chords is used to determine the number of bins that will be used throughout the SR-CLD calculation. Some common methods of choosing number of bins include Square Root rule, Sturges' Formula, Scott's Normal Reference Rule, Freedman-Diaconis Rule, Rice's Rule, and Doane's Formula. For this paper, both Rice's rule and Doane's formula were chosen due to the large number of chords and skewness of the distribution, but the authors suggest that future users look into the alternative methods to see which works best for their dataset. 
 
 ## Using the Code
 To run this project, 
@@ -68,10 +60,7 @@ Some settings to play around with would be your choice of bin calculation ('Squa
 
 ### Figures
 
-The figures below are the results of the Neper Case Study and the Titanium Case Study. For the Titanium Case Study, the horizontal SR-CLD was found for the entire gradient of both alloy samples and two areas of interest were chosen from each sample for analysis. 
-<p float="left">
-  <img src="Images/Titanium_png.png" />
-</p>
+The figure below is the results of the Neper Case Study. 
 <p float="left">
   <img src="Images/Neper_png.png" />
 </p>
