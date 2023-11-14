@@ -37,6 +37,7 @@ def Horizontal_Check(input):
                     length = 0
 
         coords = np.array(total_coords)
+        print (k)
     return coords
 
 
@@ -265,32 +266,34 @@ def BinSize(coords,setting):
 #########################################################################################
 
 #Specific Settings for Neper simulation data
-file = 'check_long.png'
-mask_raw1= Image.open(file)
-mask1 = mask_raw1.convert('RGB')
-mask1 = np.asarray(mask1)
-man_seg = mask1
-new = np.zeros((man_seg.shape[0],man_seg.shape[1])) 
-for i in range(0,len(man_seg)):
-    for j in range(0,len(man_seg[0])):
-        first = np.array_equal(man_seg[i][j],[0,0,255])
-        second = np.array_equal(man_seg[i][j],[255,255,255])  
-        if first == True and second == False:
-            new[i][j] = 1
-man_seg = new
+# file = 'check_long.png'
+# mask_raw1= Image.open(file)
+# mask1 = mask_raw1.convert('RGB')
+# mask1 = np.asarray(mask1)
+# man_seg = mask1
+# new = np.zeros((man_seg.shape[0],man_seg.shape[1])) 
+# for i in range(0,len(man_seg)):
+#     for j in range(0,len(man_seg[0])):
+#         first = np.array_equal(man_seg[i][j],[0,0,255])
+#         second = np.array_equal(man_seg[i][j],[255,255,255])  
+#         if first == True and second == False:
+#             new[i][j] = 1
+# man_seg = new
 
-plt.imshow(man_seg, cmap = plt.cm.gray)
-plt.show()
+# plt.imshow(man_seg, cmap = plt.cm.gray)
+# plt.show()
 
 #Specific Loading instructions for Titanium data 
-# man_seg = np.load('Total_img.npy')
-# man_seg = np.flip(man_seg,0)
-# man_seg = man_seg[162895:174895]
+print ('working')
+man_seg = np.load('Titanium Case Study/Alignment/Testcase.npy')
+#man_seg = np.flip(man_seg,0)
+#man_seg = man_seg[162895:174895]
 
 
 #  Overall man_seg should be equal to your binary (or greyscale) array where 1 represents inside of the grain
 #  and 0 is outside 
 
+print('here')
 st = time.time()
 chords = Horizontal_Check(man_seg)
 Num,maximum = BinSize(chords, 'Doane')
@@ -305,54 +308,57 @@ print (execution)
 #       Visualization: All very subjective. Up to you how you choose to visualize it. 
 
 # Current Visualization for Neper 
-new_Ps = Ps[:,:25]
-print (middles[:25])
+# new_Ps = Ps[:,:25]
+# print (middles[:25])
 
 
-methods = 'hermite'
+# methods = 'hermite'
 
 
-fig, ax = plt.subplots(figsize=(1, 5),
-                        subplot_kw={'xticks': [], 'yticks': []})  
+# fig, ax = plt.subplots(figsize=(1, 5),
+#                         subplot_kw={'xticks': [], 'yticks': []})  
 
-plot = ax.imshow(new_Ps, interpolation=methods, cmap = 'jet', vmax =0.35, extent=[0,middles[25],0,252], aspect='auto')
-#ax.set_title(str(method#))
-fig.colorbar(plot)#, cax=cax, orientation='vertical')
-#plt.savefig('compare_HZ_NEW.png', bbox_inches='tight', pad_inches=0)
-plt.tight_layout()
-plt.show()
+# plot = ax.imshow(new_Ps, interpolation=methods, cmap = 'jet', vmax =0.35, extent=[0,middles[25],0,252], aspect='auto')
+# #ax.set_title(str(method#))
+# fig.colorbar(plot)#, cax=cax, orientation='vertical')
+# #plt.savefig('compare_HZ_NEW.png', bbox_inches='tight', pad_inches=0)
+# plt.tight_layout()
+# plt.show()
 
-ys = np.arange(first,last+1)
-ys = np.flip(ys)
-fig, ax = plt.subplots(figsize=(1, 5),
-                        subplot_kw={'xticks': [], 'yticks': []})
+# ys = np.arange(first,last+1)
+# ys = np.flip(ys)
+# fig, ax = plt.subplots(figsize=(1, 5),
+#                         subplot_kw={'xticks': [], 'yticks': []})
 
-two = plt.plot(means,ys, color='#EA334B')
-plt.tight_layout()
-plt.ylim(first, last+1)
-plt.xlim(0,middles[25])
-#plt.savefig('compare_mean.svg', bbox_inches='tight', pad_inches=0)
+# two = plt.plot(means,ys, color='#EA334B')
+# plt.tight_layout()
+# plt.ylim(first, last+1)
+# plt.xlim(0,middles[25])
+# #plt.savefig('compare_mean.svg', bbox_inches='tight', pad_inches=0)
 
-#plt.legend([one,two],['Modes','Means'])
-plt.show()
+# #plt.legend([one,two],['Modes','Means'])
+# plt.show()
 
 
 
 
 # Current Visualization for Titanium 
 
-# methods = 'hermite'
+new_Ps = Ps[:,:25]
+print (middles[:25])
+
+methods = 'hermite'
 
 
-# fig, ax = plt.subplots(figsize=(1, 5),
-#                         subplot_kw={'xticks': [], 'yticks': []}) 
+fig, ax = plt.subplots(figsize=(1, 5),
+                        subplot_kw={'xticks': [], 'yticks': []}) 
 
-# plot = ax.imshow(new_Ps, interpolation=methods, cmap = 'jet',extent=[0,middles[25],0,12000], aspect='auto', vmax =0.30)
-# #ax.set_title(str(method#))
-# #fig.colorbar(plot)#, cax=cax, orientation='vertical')
-# plt.savefig('compare_HZ_NEW2.png', bbox_inches='tight', pad_inches=0)
-# plt.tight_layout()
-# plt.show()
+plot = ax.imshow(new_Ps, interpolation=methods, cmap = 'jet',extent=[0,middles[25],0,12000], aspect='auto', vmax =0.30)
+#ax.set_title(str(method#))
+#fig.colorbar(plot)#, cax=cax, orientation='vertical')
+#plt.savefig('compare_HZ_NEW2.png', bbox_inches='tight', pad_inches=0)
+plt.tight_layout()
+plt.show()
 
 # ys = np.arange(first,last+2)
 # ys = np.flip(ys)
