@@ -55,8 +55,7 @@ print (execution)
 ```
 
 ## Examples
-There are two provided examples, a Neper case study and a Titanium Case Study. To run either study, uncomment the corresponding section to load the data and run. 
-Some settings to play around with would be your choice of bin calculation ('Square', 'Sturges','Scotts', 'Freed', 'Rice', 'Doane') and how you would like to edit the visualization. 
+There are two provided examples, a Neper case study and a Titanium Case Study. To run the Neper Case Study, uncomment the corresponding section to load the data and run. To run the Titanium Case Study, you will need to run the Recreating_Gradient.py file in the Alignment folder. Some settings to play around with would be your choice of bin calculation ('Square', 'Sturges','Scotts', 'Freed', 'Rice', 'Doane') and how you would like to edit the visualization. 
 
 ### Figures
 
