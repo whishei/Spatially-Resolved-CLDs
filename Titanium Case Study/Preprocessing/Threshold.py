@@ -62,7 +62,7 @@ def Thresholding(directory):
             np.save(file, new)
 
 
-directory = 'Ti5553_on_Ti64_SEM_image_tile_set'#'Ti64_on_Ti5553_SEM_image_tile_set'
+directory = 'Ti64_on_Ti5553_SEM_image_tile_set'#'Ti64_on_Ti5553_SEM_image_tile_set'
 #RenameImages(directory)
 Thresholding(directory)
 

@@ -134,6 +134,9 @@ def Vertical_Align(vd_1,vd_2):
             total = total + np.sqrt(np.sum((vd_1[i] - vd_2[i-k]) ** 2)) 
         error.append(total/(len(vd_1)-k))
 
+    plt.plot(error, color = '#22B7EB')
+    plt.savefig('SR_CLD.svg', bbox_inches='tight', pad_inches=0)
+    plt.show()
     #print (error)
     print (error.index(min(error))+600)
     return (error.index(min(error))+600)
@@ -234,10 +237,11 @@ def Horizontal_Align(hd_1,hd_2):
 #Chose the directory your images are in. 
 # This code is set up to align three three images at a time 
 
-directory = 'Ti64_on_Ti5553_SEM_image_tile_set_thresholded'#'Ti5553_on_Ti64_SEM_image_tile_set_thresholded'
+directory = 'Testing'#'Ti64_on_Ti5553_SEM_image_tile_set_thresholded'#'Ti5553_on_Ti64_SEM_image_tile_set_thresholded'
 st = time.time()
 current = ''
 total_array = []
+count = 0 
 for filename in sorted(glob.glob(os.path.join(directory,'*.npy'))):
 
     #Only the case for the first image in the file 
@@ -269,13 +273,13 @@ for filename in sorted(glob.glob(os.path.join(directory,'*.npy'))):
         
         #Aligning the images vertically
         index_1 = Vertical_Align(file1_HD,file2_HD)
-        index_2 = Vertical_Align(file2_2_HD,file3_HD)
+        #index_2 = Vertical_Align(file2_2_HD,file3_HD)
         
         #Grabbing just the overlapping section from each pair of images
         file1_1 = file1[index_1:,:]
         file2_1 = file2[0:(len(file2)-index_1),:]
-        file2_2 = file2[index_2:,:]
-        file3_2 = file3[0:(len(file3)-index_2),:]
+        # file2_2 = file2[index_2:,:]
+        # file3_2 = file3[0:(len(file3)-index_2),:]
 
         #Finding the maximum vertical chord length in the entire image
         maximum = Vertical_Check(file1)
@@ -290,12 +294,12 @@ for filename in sorted(glob.glob(os.path.join(directory,'*.npy'))):
         #Calculating vertical SR-CLDs for entire image. 
         file1_1_VD = Vertical_CLDs(file1_1,max1)
         file2_1_VD = Vertical_CLDs(file2_1,max1)
-        file2_2_VD = Vertical_CLDs(file2_2,max2)
-        file3_2_VD = Vertical_CLDs(file3_2,max2)
+        # file2_2_VD = Vertical_CLDs(file2_2,max2)
+        # file3_2_VD = Vertical_CLDs(file3_2,max2)
 
         #Finding Horizontal misalign
         index_3 = Horizontal_Align(file1_1_VD,file2_1_VD)
-        index_4 = Horizontal_Align(file2_2_VD,file3_2_VD)
+        # index_4 = Horizontal_Align(file2_2_VD,file3_2_VD)
 
 
         #Aligning the images horizontally (could be left or right movement)
@@ -307,150 +311,158 @@ for filename in sorted(glob.glob(os.path.join(directory,'*.npy'))):
         if (index_3 > 10):
             HZ_1 = 10 - index_3
             for i in range(0,abs(HZ_1)):
-                temp1 = np.insert(temp1,temp1.shape[1],-1,axis = 1)
-                temp2 = np.insert(temp2,temp2.shape[1],-1,axis = 1)
-                Total = np.insert(Total,0,-1,axis = 1)
+                temp1 = np.insert(temp1,temp1.shape[1],0,axis = 1)
+                temp2 = np.insert(temp2,temp2.shape[1],0,axis = 1)
+                Total = np.insert(Total,0,0,axis = 1)
 
         #Working with the second pair of images, if index < 10, shift both bottom images to the right
         elif (index_3 < 10):
             for i in range(0,index_3):
-                temp1 = np.insert(temp1,0,-1,axis = 1)
-                temp2 = np.insert(temp2,0,-1,axis = 1)
-                Total = np.insert(Total,Total.shape[1],-1,axis = 1)
+                temp1 = np.insert(temp1,0,0,axis = 1)
+                temp2 = np.insert(temp2,0,0,axis = 1)
+                Total = np.insert(Total,Total.shape[1],0,axis = 1)
         
         #Working with the second pair of images, if index > 10, shift only the bottom image to the left
-        if (index_4 > 10):
-            HZ_2 = 10 - index_4
-            for i in range(0,abs(HZ_2)):
-                temp1 = np.insert(temp1,0,-1,axis = 1)
-                temp2 = np.insert(temp2,temp2.shape[1],-1,axis = 1)
-                Total = np.insert(Total,0,-1,axis = 1)
+        # if (index_4 > 10):
+        #     HZ_2 = 10 - index_4
+        #     for i in range(0,abs(HZ_2)):
+        #         temp1 = np.insert(temp1,0,-1,axis = 1)
+        #         temp2 = np.insert(temp2,temp2.shape[1],-1,axis = 1)
+        #         Total = np.insert(Total,0,-1,axis = 1)
                 
-        #Working with the second pair of images, if index < 10, shift only the bottom image to the right
-        elif (index_4 < 10):
-            for i in range(0,index_4):
-                temp1 = np.insert(temp1,temp1.shape[1],-1,axis = 1)
-                temp2 = np.insert(temp2,0,-1,axis = 1)
-                Total = np.insert(Total,Total.shape[1],-1,axis = 1)
+        # #Working with the second pair of images, if index < 10, shift only the bottom image to the right
+        # elif (index_4 < 10):
+        #     for i in range(0,index_4):
+        #         temp1 = np.insert(temp1,temp1.shape[1],-1,axis = 1)
+        #         temp2 = np.insert(temp2,0,-1,axis = 1)
+        #         Total = np.insert(Total,Total.shape[1],-1,axis = 1)
         
         #Slicing the bottom overlap off the two top images
         Total = Total[:index_1,:]
-        temp1 = temp1[:index_2,:]
+        # temp1 = temp1[:index_2,:]
 
         #Concatenating the three aligned images into one
         Total = np.concatenate((Total,temp1),axis = 0)
-        Total = np.concatenate((Total,temp2),axis = 0)
+        # Total = np.concatenate((Total,temp2),axis = 0)
 
         #Saving the files
         newfile1 = 'Tile_' + current+ '.npy'
-        newfile2 = 'Tile_' + current+ '.png'
+        newfile2 = 'Tile2_' + current+ '.eps'
 
         plt.imshow(Total,cmap = plt.cm.gray)
         plt.axis('off')
-        plt.savefig(newfile2, bbox_inches='tight', pad_inches=0)
-        np.save(newfile1,Total)
+        #plt.show()
+        plt.savefig(newfile2, bbox_inches='tight', pad_inches=0, format='eps', dpi=1200)
+        #plt.savefig(newfile2, bbox_inches='tight', pad_inches=0)
+        #np.save(newfile1,Total)
         
         current = filename[len(directory) + 6: len(directory) + 9]
         total_array = []
 
     #Loading the images
     new = np.load(filename)
+    # plt.imshow(new, cmap = 'gray')
+    # # plt.show()
+    # plt.axis('off')
+    # file = 'image_' + str(count) + '.eps'
+    #     #plt.show()
+    # plt.savefig(file, bbox_inches='tight', pad_inches=0, format='eps', dpi=1200)
 
     total_array.append(new)
-
+    count = count + 1
     print (current)
 
 
-#Same process as above, just working with the last set of three images in the file. 
-file1 = total_array[0]
-file2 = total_array[1]
-file3 = total_array[2]
+# #Same process as above, just working with the last set of three images in the file. 
+# file1 = total_array[0]
+# file2 = total_array[1]
+# file3 = total_array[2]
 
-maximum = Horizontal_Check(file1)
-maximum2 = Horizontal_Check(file2)
-maximum3 = Horizontal_Check(file3)
+# maximum = Horizontal_Check(file1)
+# maximum2 = Horizontal_Check(file2)
+# maximum3 = Horizontal_Check(file3)
 
-max1 = max(maximum,maximum2)  
-max2 = max(maximum2,maximum3)      
+# max1 = max(maximum,maximum2)  
+# max2 = max(maximum2,maximum3)      
 
-file1_HD = Horizontal_CLDs(file1,max1)
-file2_HD = Horizontal_CLDs(file2,max1)
-file2_2_HD = Horizontal_CLDs(file2,max2)
-file3_HD = Horizontal_CLDs(file3,max2)
+# file1_HD = Horizontal_CLDs(file1,max1)
+# file2_HD = Horizontal_CLDs(file2,max1)
+# file2_2_HD = Horizontal_CLDs(file2,max2)
+# file3_HD = Horizontal_CLDs(file3,max2)
 
-#Finding Vertical misalign
-index_1 = Vertical_Align(file1_HD,file2_HD)
-index_2 = Vertical_Align(file2_2_HD,file3_HD)
+# #Finding Vertical misalign
+# index_1 = Vertical_Align(file1_HD,file2_HD)
+# index_2 = Vertical_Align(file2_2_HD,file3_HD)
 
-file1_1 = file1[index_1:,:]
-file2_1 = file2[0:(len(file2)-index_1),:]
+# file1_1 = file1[index_1:,:]
+# file2_1 = file2[0:(len(file2)-index_1),:]
 
-file2_2 = file2[index_2:,:]
-file3_2 = file3[0:(len(file3)-index_2),:]
+# file2_2 = file2[index_2:,:]
+# file3_2 = file3[0:(len(file3)-index_2),:]
 
-maximum = Vertical_Check(file1)
-maximum2 = Vertical_Check(file2)
-maximum3 = Vertical_Check(file3)
+# maximum = Vertical_Check(file1)
+# maximum2 = Vertical_Check(file2)
+# maximum3 = Vertical_Check(file3)
 
-max1 = max(maximum,maximum2)  
-max2 = max(maximum2,maximum3)      
+# max1 = max(maximum,maximum2)  
+# max2 = max(maximum2,maximum3)      
 
-file1_1_VD = Vertical_CLDs(file1_1,max1)
-file2_1_VD = Vertical_CLDs(file2_1,max1)
-file2_2_VD = Vertical_CLDs(file2_2,max2)
-file3_2_VD = Vertical_CLDs(file3_2,max2)
+# file1_1_VD = Vertical_CLDs(file1_1,max1)
+# file2_1_VD = Vertical_CLDs(file2_1,max1)
+# file2_2_VD = Vertical_CLDs(file2_2,max2)
+# file3_2_VD = Vertical_CLDs(file3_2,max2)
 
-#Finding Horizontal misalign
-index_3 = Horizontal_Align(file1_1_VD,file2_1_VD)
-index_4 = Horizontal_Align(file2_2_VD,file3_2_VD)
+# #Finding Horizontal misalign
+# index_3 = Horizontal_Align(file1_1_VD,file2_1_VD)
+# index_4 = Horizontal_Align(file2_2_VD,file3_2_VD)
 
-Total = file1
-temp1 = file2
-temp2 = file3
+# Total = file1
+# temp1 = file2
+# temp2 = file3
 
-if (index_3 > 10):
-    HZ_1 = 10 - index_3
-    for i in range(0,abs(HZ_1)):
-        temp1 = np.insert(temp1,temp1.shape[1],-1,axis = 1)
-        temp2 = np.insert(temp2,temp2.shape[1],-1,axis = 1)
-        Total = np.insert(Total,0,-1,axis = 1)
-        #print (i)
-elif (index_3 < 10):
-    for i in range(0,index_3):
-        temp1 = np.insert(temp1,0,-1,axis = 1)
-        temp2 = np.insert(temp2,0,-1,axis = 1)
-        Total = np.insert(Total,Total.shape[1],-1,axis = 1)
-        #print(i)
+# if (index_3 > 10):
+#     HZ_1 = 10 - index_3
+#     for i in range(0,abs(HZ_1)):
+#         temp1 = np.insert(temp1,temp1.shape[1],-1,axis = 1)
+#         temp2 = np.insert(temp2,temp2.shape[1],-1,axis = 1)
+#         Total = np.insert(Total,0,-1,axis = 1)
+#         #print (i)
+# elif (index_3 < 10):
+#     for i in range(0,index_3):
+#         temp1 = np.insert(temp1,0,-1,axis = 1)
+#         temp2 = np.insert(temp2,0,-1,axis = 1)
+#         Total = np.insert(Total,Total.shape[1],-1,axis = 1)
+#         #print(i)
 
-if (index_4 > 10):
-    HZ_2 = 10 - index_4
-    for i in range(0,abs(HZ_2)):
-        temp1 = np.insert(temp1,0,-1,axis = 1)
-        temp2 = np.insert(temp2,temp2.shape[1],-1,axis = 1)
-        Total = np.insert(Total,0,-1,axis = 1)
-        #print (i)
-elif (index_4 < 10):
-    for i in range(0,index_4):
-        temp1 = np.insert(temp1,temp1.shape[1],-1,axis = 1)
-        temp2 = np.insert(temp2,0,-1,axis = 1)
-        Total = np.insert(Total,Total.shape[1],-1,axis = 1)
-        #print(i)
+# if (index_4 > 10):
+#     HZ_2 = 10 - index_4
+#     for i in range(0,abs(HZ_2)):
+#         temp1 = np.insert(temp1,0,-1,axis = 1)
+#         temp2 = np.insert(temp2,temp2.shape[1],-1,axis = 1)
+#         Total = np.insert(Total,0,-1,axis = 1)
+#         #print (i)
+# elif (index_4 < 10):
+#     for i in range(0,index_4):
+#         temp1 = np.insert(temp1,temp1.shape[1],-1,axis = 1)
+#         temp2 = np.insert(temp2,0,-1,axis = 1)
+#         Total = np.insert(Total,Total.shape[1],-1,axis = 1)
+#         #print(i)
 
-Total = Total[:index_1,:]
-temp1 = temp1[:index_2,:]
-Total = np.concatenate((Total,temp1),axis = 0)
-Total = np.concatenate((Total,temp2),axis = 0)
+# Total = Total[:index_1,:]
+# temp1 = temp1[:index_2,:]
+# Total = np.concatenate((Total,temp1),axis = 0)
+# Total = np.concatenate((Total,temp2),axis = 0)
 
-newfile1 = 'Tile_' + current+ '.npy'
-newfile2 = 'Tile_' + current+ '.png'
+# newfile1 = 'Tile_' + current+ '.npy'
+# newfile2 = 'Tile_' + current+ '.png'
 
-plt.imshow(Total,cmap = plt.cm.gray)
-plt.axis('off')
-plt.savefig(newfile2, bbox_inches='tight', pad_inches=0)
-#plt.show()
+# plt.imshow(Total,cmap = plt.cm.gray)
+# plt.axis('off')
+# #plt.savefig(newfile2, bbox_inches='tight', pad_inches=0)
+# plt.show()
 
-np.save(newfile1,Total)
+# #np.save(newfile1,Total)
 
-end = time.time()
-execution = end - st
-print (execution)
+# end = time.time()
+# execution = end - st
+# print (execution)
