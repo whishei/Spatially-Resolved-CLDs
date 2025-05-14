@@ -1,4 +1,5 @@
 from utils import * 
+import cv2
 
 
 #########################################################################################
@@ -23,33 +24,33 @@ from utils import *
 #### Loading SPPARKS Case Study images
 
 # File name
-# img = 'SPPARKS/SPPARKS_seg_1.png'
+img = 'SPPARKS/SPPARKS_seg_1.png'
 
-# # Load the image
-# img = cv2.imread(img)
+# Load the image
+img = cv2.imread(img)
 
-# # Create a mask for black pixels (R, G, B all below 30)
-# is_black = np.all(img < 100, axis=-1)
+# Create a mask for black pixels (R, G, B all below 30)
+is_black = np.all(img < 100, axis=-1)
 
-# # Create binary mask: 1 for grains (non-black), 0 for boundaries (black)
-# grain_mask = np.where(is_black, 0, 1).astype(np.uint8)
+# Create binary mask: 1 for grains (non-black), 0 for boundaries (black)
+grain_mask = np.where(is_black, 0, 1).astype(np.uint8)
 
-# # (Optional) Multiply by 255 if you want to save it as an image
-# grain_mask = np.invert(grain_mask)
+# (Optional) Multiply by 255 if you want to save it as an image
+grain_mask = np.invert(grain_mask)
 
-# kernel = np.ones((3, 3), np.uint8)
-# closed = cv2.morphologyEx(grain_mask, cv2.MORPH_CLOSE, kernel, iterations=1)
+kernel = np.ones((3, 3), np.uint8)
+closed = cv2.morphologyEx(grain_mask, cv2.MORPH_CLOSE, kernel, iterations=1)
 
-# man_seg = np.invert(closed)
+man_seg = np.invert(closed)
 
-# man_seg = man_seg[60:1376, 60:3036]
+man_seg = man_seg[60:1376, 60:3036]
 
-# man_seg = np.rot90(man_seg,1)
+man_seg = np.rot90(man_seg,1)
 
 #########################################################################################
 #### Loading Titanium Case Study images
 
-man_seg = np.load('64_Sample1_113000_125000.npy')
+# man_seg = np.load('64_Sample1_113000_125000.npy')
 
 #########################################################################################
 #### Loading Demo Arrays
