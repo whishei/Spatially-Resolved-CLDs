@@ -1,17 +1,11 @@
 ############ SR-CLD Calculation and Visualization #################
 
 import numpy as np
-from PIL import Image
 import matplotlib.pyplot as plt
-import scipy.ndimage as ndimage  
-import time
 from scipy.stats import iqr,tstd,tmean
-import statistics
 import math
 from numba import jit
-import scipy.stats as stats
-from scipy.stats import chisquare
-import cv2
+
 
 @jit(nopython=True)
 
@@ -60,25 +54,26 @@ def Vertical_Chords(img, k =1):
 def CLD(chords, N, maximum,name):
     vals, edges = np.histogram(chords,N, range=[0.5, maximum + 0.5])
 
-    middles = [] 
     num = []
     
     for i in range(0,len(edges)-1):
-        middle = (edges[i]+ edges[i+1])/2 
-        middles.append(middle)
-        num.append(vals[i]*middle)
+        num.append(vals[i])
+        width = (edges[i+1] - edges[i])
     
     den = sum(num)
     
     if den == 0:
         P = num 
     else:
-        P = num/den   
+        P = num/den 
 
-    plt.plot(P, color='#EA334B')
-    if name != "":
-        plt.savefig(name, dpi=600, bbox_inches='tight')
-    plt.show()
+    P = P/width
+
+    # plt.plot(P, color='#EA334B')
+    # plt.ylim(0,0.18)
+    # if name != "":
+    #     plt.savefig(name, dpi=600, bbox_inches='tight')
+    # plt.show()
 
     return P
 
@@ -92,18 +87,15 @@ def SRCLD(krow_chords, chords, Num=0, maximum=0):
     
     Ps = []
     means = []
-    min_num = []
 
     for i in range(0,len(krow_chords)):
         vals, edges = np.histogram(krow_chords[i],Num, range=[0.5, maximum + 0.5])
 
-        middles = [] 
         num = []
         
         for j in range(0,len(edges)-1):
-            middle = (edges[j]+ edges[j+1])/2 
-            middles.append(middle)
-            num.append(vals[j]*middle)
+            width = (edges[j+1] - edges[j])
+            num.append(vals[j])
         
         den = sum(num)
         
@@ -113,15 +105,12 @@ def SRCLD(krow_chords, chords, Num=0, maximum=0):
             P = num/den  
             mean = np.mean(krow_chords[i])
             means.append(mean)
-            Ps.append(P)
-            min_num.append(len(krow_chords[i]))
+            Ps.append(P/width)
 
     Ps = np.array(Ps)
     means = np.array(means) 
-    min_num = np.array(min_num)
 
-    return Ps,means,min_num
-
+    return Ps,means
 
 #Calculating the ideal number of bins and largest range value for the probability distributions  
 #  input: coords, setting ('Square','Sturges','Scotts','Freed','Doane','Rice')
@@ -180,16 +169,16 @@ def BinSize(chords,setting):
         return int(doane), maximum 
 
 
-def Visualization(Ps,means, setting, maximum, name=""):
+def Visualization(Ps,means, setting, maximum, vmax_val=0.05, name=""):
 
 
     if setting == "Horizontal":
         fig, ax = plt.subplots(figsize=(1, 5),
                             subplot_kw={'xticks': [], 'yticks': []})  
 
-        plot = ax.imshow(Ps, cmap = 'Spectral_r', aspect='auto') #vmax = )
+        plot = ax.imshow(Ps, cmap = 'Spectral_r', aspect='auto',vmax = vmax_val)
         cbar = fig.colorbar(plot)
-        #cbar.set_ticks(np.linspace(0, vmax_val, num=5))
+        cbar.set_ticks(np.linspace(0, vmax_val, num=5))
         plt.title("SR-CLD")
         if name != "":
             name_P = name+"_Ps.png"
@@ -220,9 +209,9 @@ def Visualization(Ps,means, setting, maximum, name=""):
         fig, ax = plt.subplots(figsize=(5, 1),
                             subplot_kw={'xticks': [], 'yticks': []})  
 
-        plot = ax.imshow(Ps, cmap = 'Spectral_r', aspect='auto')#, vmax = 0.2)
+        plot = ax.imshow(Ps, cmap = 'Spectral_r', aspect='auto', vmax = vmax_val)
         cbar = fig.colorbar(plot)
-        #cbar.set_ticks(np.linspace(0, vmax_val, num=5))
+        cbar.set_ticks(np.linspace(0, vmax_val, num=5))
         plt.title("SR-CLD")
         if name != "":
             name_P = name+"_Ps.png"
